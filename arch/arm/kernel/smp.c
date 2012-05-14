@@ -31,6 +31,7 @@
 #include <asm/cacheflush.h>
 #include <asm/cpu.h>
 #include <asm/cputype.h>
+#include <asm/topology.h>
 #include <asm/mmu_context.h>
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -271,6 +272,8 @@ static void __cpuinit smp_store_cpu_info(unsigned int cpuid)
 	struct cpuinfo_arm *cpu_info = &per_cpu(cpu_data, cpuid);
 
 	cpu_info->loops_per_jiffy = loops_per_jiffy;
+
+	store_cpu_topology(cpuid);
 }
 
 /*
@@ -376,6 +379,8 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 {
 	unsigned int ncores = num_possible_cpus();
 
+	init_cpu_topology();
+
 	smp_store_cpu_info(smp_processor_id());
 
 	/*
@@ -476,7 +481,9 @@ asmlinkage void __exception_irq_entry do_local_timer(struct pt_regs *regs)
 	if (local_timer_ack()) {
 		__inc_irq_stat(cpu, local_timer_irqs);
 		sec_debug_irq_sched_log(0, do_local_timer, 1);
+		irq_enter();
 		ipi_timer();
+		irq_exit();
 		sec_debug_irq_sched_log(0, do_local_timer, 2);
 	} else
 		sec_debug_irq_sched_log(0, do_local_timer, 3);
@@ -673,7 +680,9 @@ asmlinkage void __exception_irq_entry do_IPI(int ipinr, struct pt_regs *regs)
 		break;
 
 	case IPI_CPU_BACKTRACE:
+		irq_enter();
 		ipi_cpu_backtrace(cpu, regs);
+		irq_exit();
 		break;
 
 	default:

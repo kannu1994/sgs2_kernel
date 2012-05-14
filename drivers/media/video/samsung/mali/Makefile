@@ -10,8 +10,8 @@
 
 OSKOS :=linux
 FILES_PREFIX=
-MALI_FILE_PREFIX = $(KBUILD_SRC)/drivers/media/video/samsung/mali
-KBUILDROOT = $(KBUILD_OUTPUT)
+MALI_FILE_PREFIX := drivers/media/video/samsung/mali
+KBUILDROOT =
 
 ifeq ($(CONFIG_MALI_DED_ONLY),y)
 USING_OS_MEMORY=0
@@ -84,7 +84,7 @@ ifeq ($(USING_OS_MEMORY),1)
         USING_MMU = 1
 endif
 # Check if a Mali Core sub module should be enabled, true or false returned
-#submodule_enabled = $(shell set -x ; echo $(KBUILD_SRC) 1>&2; gcc $(DEFINES) -E $(MALI_FILE_PREFIX)/arch/config.h | grep type | grep -c $(2))
+#submodule_enabled = $(shell gcc $(DEFINES) -E $(MALI_FILE_PREFIX)/arch/config.h | grep type | grep -c $(2))
 
 # Inside the kernel build system
 
@@ -110,7 +110,7 @@ DEFINES += -DMALI_POWER_MGMT_TEST_SUITE=$(USING_MALI_PMM_TESTSUITE)
 DEFINES += -DMALI_MAJOR_PREDEFINE=$(USING_MALI_MAJOR_PREDEFINE)
 DEFINES += -DMALI_DVFS_ENABLED=$(USING_MALI_DVFS_ENABLED)
 DEFINES += -DUSING_MALI_PMM_EARLYSUSPEND=$(USING_MALI_PMM_EARLYSUSPEND)
-DEFINES += -DMALI_STATE_TRACKING=1
+DEFINES += -DMALI_STATE_TRACKING=0
 DEFINES += -DMALI_OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB=$(OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB)
 DEFINES += -DMALI_TRACEPOINTS_ENABLED=$(USING_TRACEPOINTS)
 
@@ -135,12 +135,10 @@ obj-$(CONFIG_VIDEO_MALI400MP)		+= mali.o
 # Use our defines when compiling
 # MALI
 INCLUDES = \
-        -I$(KBUILD_SRC) \
-        -I$(KBUILD_OUTPUT) \
 		-I$(MALI_FILE_PREFIX)\
 		-I$(MALI_FILE_PREFIX)/platform\
 		-I$(MALI_FILE_PREFIX)/common \
-		-I$(MALI_FILE_PREFIX)/linux
+		-I$(MALI_FILE_PREFIX)/linux 
 
 EXTRA_CFLAGS += $(INCLUDES)\
 		$(DEFINES) 
@@ -266,12 +264,17 @@ mali-y += \
 endif #($(CONFIG_CPU_EXYNOS4210),y)
 endif #($(USING_MALI_DVFS_ENABLED),1)
 
+ifeq ($(CONFIG_GPU_CLOCK_CONTROL),y)
+mali-y += common/gpu_clock_control.o
+mali-y += common/gpu_voltage_control.o
+endif
+
 ifeq ($(PANIC_ON_WATCHDOG_TIMEOUT),1)
 	EXTRA_CFLAGS += -DUSING_KERNEL_PANIC
 endif
 
 # Get subversion revision number, fall back to 0000 if no svn info is available
-SVN_REV:=$(shell ((svnversion | grep -E "^[0-9]+" && echo -n 'Revision: ' && svnversion) || git svn info | sed -e 's/$$$$/M/' | grep '^Revision: ' || echo ${MALI_RELEASE_NAME}) 2>/dev/null | sed -e 's/^Revision: //')
+SVN_REV:=$(shell ((svnversion | grep -qv exported && echo -n 'Revision: ' && svnversion) || git svn info | sed -e 's/$$$$/M/' | grep '^Revision: ' || echo ${MALI_RELEASE_NAME}) 2>/dev/null | sed -e 's/^Revision: //')
 
 EXTRA_CFLAGS += -DSVN_REV=$(SVN_REV)
 EXTRA_CFLAGS += -DSVN_REV_STRING=\"$(SVN_REV)\"

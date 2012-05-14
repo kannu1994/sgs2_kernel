@@ -2,9 +2,9 @@
 #include <linux/pm.h>
 #include <asm/io.h>
 #include <asm/cacheflush.h>
-#include <mach/system.h>
 #include <mach/regs-pmu.h>
 #include <mach/gpio.h>
+#include <plat/system-reset.h>
 
 /* charger cable state */
 extern bool is_cable_attached;
@@ -88,10 +88,10 @@ static void sec_reboot(char str, const char *cmd)
 		else if (!strcmp(cmd, "recovery"))
 			writel(REBOOT_MODE_PREFIX | REBOOT_MODE_RECOVERY,
 			       S5P_INFORM3);
-        else if (!strcmp(cmd, "bootloader"))
+		else if (!strcmp(cmd, "download"))
 			writel(REBOOT_MODE_PREFIX | REBOOT_MODE_DOWNLOAD,
 			       S5P_INFORM3);
-		else if (!strcmp(cmd, "download"))
+		else if (!strcmp(cmd, "bootloader"))
 			writel(REBOOT_MODE_PREFIX | REBOOT_MODE_DOWNLOAD,
 			       S5P_INFORM3);
 		else if (!strcmp(cmd, "upload"))

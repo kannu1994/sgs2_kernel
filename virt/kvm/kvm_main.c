@@ -796,12 +796,13 @@ skip_lpage:
 	if (r)
 		goto out_free;
 
-	/* map the pages in iommu page table */
+	/* map/unmap the pages in iommu page table */
 	if (npages) {
 		r = kvm_iommu_map_pages(kvm, &new);
 		if (r)
 			goto out_free;
-	}
+	} else
+		kvm_iommu_unmap_pages(kvm, &old);
 
 	r = -ENOMEM;
 	slots = kzalloc(sizeof(struct kvm_memslots), GFP_KERNEL);
@@ -1643,10 +1644,6 @@ static int kvm_vm_ioctl_create_vcpu(struct kvm *kvm, u32 id)
 	smp_wmb();
 	atomic_inc(&kvm->online_vcpus);
 
-#ifdef CONFIG_KVM_APIC_ARCHITECTURE
-	if (kvm->bsp_vcpu_id == id)
-		kvm->bsp_vcpu = vcpu;
-#endif
 	mutex_unlock(&kvm->lock);
 	return r;
 

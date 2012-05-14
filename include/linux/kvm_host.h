@@ -236,7 +236,6 @@ struct kvm {
 	struct srcu_struct srcu;
 #ifdef CONFIG_KVM_APIC_ARCHITECTURE
 	u32 bsp_vcpu_id;
-	struct kvm_vcpu *bsp_vcpu;
 #endif
 	struct kvm_vcpu *vcpus[KVM_MAX_VCPUS];
 	atomic_t online_vcpus;
@@ -554,6 +553,7 @@ void kvm_free_irq_source_id(struct kvm *kvm, int irq_source_id);
 
 #ifdef CONFIG_IOMMU_API
 int kvm_iommu_map_pages(struct kvm *kvm, struct kvm_memory_slot *slot);
+void kvm_iommu_unmap_pages(struct kvm *kvm, struct kvm_memory_slot *slot);
 int kvm_iommu_map_guest(struct kvm *kvm);
 int kvm_iommu_unmap_guest(struct kvm *kvm);
 int kvm_assign_device(struct kvm *kvm,
@@ -565,6 +565,11 @@ static inline int kvm_iommu_map_pages(struct kvm *kvm,
 				      struct kvm_memory_slot *slot)
 {
 	return 0;
+}
+
+static inline void kvm_iommu_unmap_pages(struct kvm *kvm,
+					 struct kvm_memory_slot *slot)
+{
 }
 
 static inline int kvm_iommu_map_guest(struct kvm *kvm)

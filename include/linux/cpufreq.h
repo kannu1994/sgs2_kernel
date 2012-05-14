@@ -24,6 +24,9 @@
 
 #define CPUFREQ_NAME_LEN 16
 
+#define CPU_UV_MV_MAX 1500000
+#define CPU_UV_MV_MIN 750000
+
 
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
@@ -180,6 +183,8 @@ struct cpufreq_governor {
 			will fallback to performance governor */
 	struct list_head	governor_list;
 	struct module		*owner;
+	int disableScalingDuringSuspend;
+	int enableSmoothScaling;
 };
 
 /*
@@ -378,6 +383,27 @@ extern struct cpufreq_governor cpufreq_gov_adaptive;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_PEGASUSQ)
 extern struct cpufreq_governor cpufreq_gov_pegasusq;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_pegasusq)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_LULZACTIVE)
+extern struct cpufreq_governor cpufreq_gov_lulzactive;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_lulzactive)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_LAGFREE)
+extern struct cpufreq_governor cpufreq_gov_lagfree;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_lagfree)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND)
+extern struct cpufreq_governor cpufreq_gov_intellidemand;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_intellidemand)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SAVAGEDZEN)
+extern struct cpufreq_governor cpufreq_gov_savagedzen;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_savagedzen)
+#elif defined(CPU_FREQ_DEFAULT_GOV_SMARTASS2)
+extern struct cpufreq_governor cpufreq_gov_smartass2;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_smartass2)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SAKURACTIVE)
+extern struct cpufreq_governor cpufreq_gov_sakuractive;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_sakuractive)
+#elif defined(CPU_FREQ_DEFAULT_GOV_BRAZILIANWAX)
+extern struct cpufreq_governor cpufreq_gov_brazilianwax;
+#define CPUFREQ_DEFAULT_GOVERNOR  (&cpufreq_gov_brazilianwax)
 #endif
 
 
